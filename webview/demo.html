@@ -1,0 +1,40 @@
+<!doctype html>
+
+<head>
+    <meta charset="utf-8">
+    <title>EventDSL</title>
+    <script src="./blockly_compressed.js"></script>
+    <script src="./blocks_compressed.js"></script>
+    <script src="./javascript_compressed.js"></script>
+    <script src="./zh-hans.js"></script>
+    <style>
+        #blocklyDiv .blocklyToolboxDiv {
+            width: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <p>
+        <button onclick="importOnce()">eventdsl to json&block</button>
+        <button onclick="buildOnce()">json to eventdsl</button>
+        <button onclick="window.buildBlocks()">json to block</button>
+        <br>
+        <span>eventdsl:</span>
+        <input id="eventdslraw" type="text" style="width: 300px;" value="monster/3">
+        <span>block/json:</span>
+    </p>
+    <div style="clear: both;"></div>
+    <div style="float: left;">
+        <div id="blocklyDiv" style="height: 550px; width: 450px;"></div>
+    </div>
+    <div style="float: left;width:calc(95vw - 450px);margin-left: 0.3vw;">
+        <textarea name="blocklyinput" id="blocklyinput" cols="60" rows="27" spellcheck="false"></textarea>
+    </div>
+    <div style="clear: both;"></div>
+    <!-- <script src="./Converter.bundle.min.js"></script> -->
+    <script src="page.js"></script>
+    <script src="EventDSL.js"></script>
+</body>
+
+</html>
