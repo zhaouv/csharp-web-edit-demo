@@ -10,12 +10,43 @@
 
 <body>
     <div>
-        测试 <a href="#" onclick="test()">run</a><br>
-        <a href="./demo.html">demo</a><br>
+        <a href="./demo.html">goto demo</a><br>
+        <a href="./webview.html">goto webview</a><br>
+        <a href="#" onclick="testrandom()">random</a><br>
+        <a href="#" onclick="testget()">get</a><br>
+        <a href="#" onclick="testset()">set</a><br>
     </div>
     <script>
-        function test(params) {
+        window.resizeTo(300,600)
+        function xhrPost(url,data,callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState==4){
+                    if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                        callback(null,xhr.responseText);
+                    }else{
+                        callback([xhr.status,xhr.responseText],null);
+                    }
+                }
+            }
+            xhr.open('post',url);
+            xhr.setRequestHeader('Content-Type','text/plain')
+            xhr.send(data);
+        }
+        function testrandom(params) {
             document.querySelector('div').insertAdjacentHTML('beforeend','<br>'+Math.random())
+        }
+        function testget(params) {
+            
+            xhrPost('/get','',(e,d)=>{
+                document.querySelector('div').insertAdjacentHTML('beforeend','<br>'+e+' '+d)
+            })
+        }
+        function testset(params) {
+            
+            xhrPost('/set',''+Math.random(),(e,d)=>{
+                document.querySelector('div').insertAdjacentHTML('beforeend','<br>'+e+' '+d)
+            })
         }
     </script>
 </body>

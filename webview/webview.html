@@ -1,0 +1,143 @@
+<!doctype html>
+
+<head>
+    <meta charset="utf-8">
+    <title>EventDSL</title>
+    <script src="./blockly_compressed.js"></script>
+    <script src="./blocks_compressed.js"></script>
+    <script src="./javascript_compressed.js"></script>
+    <script src="./zh-hans.js"></script>
+    <style>
+        #blocklyDiv .blocklyToolboxDiv {
+            width: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <p>
+        <button onclick="testget()">fetch</button>
+        <button onclick="testset()">confirm</button>
+        <!-- <button onclick="importOnce()">eventdsl to block</button> -->
+        <!-- <button onclick="buildOnce()">block to eventdsl</button> -->
+        <!-- <button onclick="window.buildBlocks()">json to block</button> -->
+        <br>
+        <span>eventdsl:</span>
+        <input id="eventdslraw" type="text" style="width: 300px;" value="monster/3">
+        <!-- <span>block/json:</span> -->
+    </p>
+    <div style="clear: both;"></div>
+    <div style="float: left;">
+        <div id="blocklyDiv" style="height: 550px; width: 450px;"></div>
+    </div>
+    <div style="float: left;width:calc(95vw - 450px);margin-left: 0.3vw;display: none;">
+        <textarea name="blocklyinput" id="blocklyinput" cols="60" rows="27" spellcheck="false"></textarea>
+    </div>
+    <div style="clear: both;"></div>
+<script>
+window.resizeTo(500,700)
+
+function xhrPost(url,data,callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState==4){
+            if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                callback(null,xhr.responseText);
+            }else{
+                callback([xhr.status,xhr.responseText],null);
+            }
+        }
+    }
+    xhr.open('post',url);
+    xhr.setRequestHeader('Content-Type','text/plain')
+    xhr.send(data);
+}
+function testget(params) {
+    xhrPost('/get','',(e,d)=>{
+        eventdslraw.value=d
+        importOnce()
+    })
+}
+function testset(params) {
+    xhrPost('/set',eventdslraw.value,(e,d)=>{
+    })
+}
+
+
+
+window.buildBlocks=function(params) {
+    // console.log('buildBlocks')
+    try {
+        EventDSLFunctions.parse(eval('('+document.querySelector('#blocklyinput').value.replace(/[<>&]/g, function (c) {
+            return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
+        })+')'))
+        buildOnce();
+    } catch (error) {
+        if(error.message!=='EventDSLFunctions is not defined')console.error(error)
+    }
+}
+testget()
+
+var lastvalue = ['']
+window.trigger = function(params) {
+    if (params[1]==lastvalue[0]) {
+        return
+    }
+    lastvalue[0]=params[1]
+    try {
+        if(params[1]){
+            localStorage.setItem('EventDSL',document.querySelector('#blocklyinput').value)
+        }
+    } catch (error) {
+    }
+    // console.log(params[1])
+    buildOnce();
+}
+
+function buildOnce(params) {
+    eventdslraw.value=json2dsl(eval('('+document.querySelector('#blocklyinput').value+')'));
+}
+
+function importOnce(params) {
+    document.querySelector('#blocklyinput').value=JSON.stringify( dsl2json(eventdslraw.value),null,4)
+    window.trigger([0,lastvalue[0]+' '])
+    window.buildBlocks()
+}
+
+
+
+///////////////////////////////////////////////////////////////////
+
+function dsl2json(dsl) {
+    var statements= dsl.split('<>').map(event1=>{
+        var info=event1.split('/')
+        if (info[0] in EventDSLBlocks) {
+            var block=EventDSLBlocks[info[0]]
+            var ret={type:info[0]}
+            block.args.forEach((k,i)=>{
+                ret[k]=info[i+1]
+            })
+            return ret
+        } else {
+            return {type:'undef',content:event1}
+        }
+    })
+    return {"type": "eventDSL","statement": statements}
+}
+
+function json2dsl(jsonobj) {
+    return jsonobj.statement.map(event2=>{
+        if (event2.type=='undef') {
+            return event2.content
+        } else {
+            
+            return [event2.type].concat(EventDSLBlocks[event2.type].args.map(k=>event2[k])).join('/')
+        }
+    }).join('<>')
+}
+
+</script>
+<script src="EventDSL.js"></script>
+</body>
+
+</html>

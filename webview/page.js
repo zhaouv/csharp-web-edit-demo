@@ -1,3 +1,5 @@
+window.resizeTo(800,600)
+
 if (localStorage.getItem('EventDSL')!=null) {
     try {
         document.querySelector('#blocklyinput').value=localStorage.getItem('EventDSL')
